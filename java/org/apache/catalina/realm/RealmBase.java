@@ -928,6 +928,15 @@ public abstract class RealmBase extends LifecycleMBeanBase implements Realm {
             }
         }
 
+        // Check for a role alias/mapping defined on context level
+        if (getContainer() instanceof Context) {
+            Context context = (Context) getContainer();
+            String realRole = context.findRoleMapping(role);
+            if (realRole != null) {
+                role = realRole;
+            }
+        }
+
         // Should be overridden in JAASRealm - to avoid pretty inefficient conversions
         if (principal == null || role == null) {
             return false;

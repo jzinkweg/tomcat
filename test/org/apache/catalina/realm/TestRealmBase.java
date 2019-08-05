@@ -19,7 +19,9 @@ package org.apache.catalina.realm;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletSecurityElement;
 import javax.servlet.annotation.ServletSecurity;
@@ -788,5 +790,46 @@ public class TestRealmBase {
         request.setUserPrincipal(gp99);
         Assert.assertFalse(mapRealm.hasResourcePermission(
                 request, response, constraintsDelete, null));
+    }
+
+    @Test
+    public void testRoleMapping() throws Exception {
+        Context context = new TesterContext() {
+            private Map<String, String> roleMapping = new HashMap<>();
+
+            public void addRoleMapping(String role, String link) {
+                roleMapping.put(role, link);
+            }
+
+            @Override
+            public String findRoleMapping(String role) {
+                return roleMapping.get(role);
+            }
+        };
+
+        context.addRoleMapping(ROLE2, "very-complex-role-name");
+        // We won't map ROLE3 to "another-very-complex-role-name" to make it fail
+        // intentionally
+
+        TesterMapRealm realm = new TesterMapRealm();
+        MessageDigestCredentialHandler ch = new MessageDigestCredentialHandler();
+        ch.setAlgorithm("SHA");
+        realm.setCredentialHandler(ch);
+        realm.setContainer(context);
+        realm.start();
+
+        realm.addUser(USER1, PWD_SHA);
+        realm.addUserRole(USER1, ROLE1);
+        realm.addUserRole(USER1, "very-complex-role-name");
+        realm.addUserRole(USER1, "another-very-complex-role-name");
+
+        Principal p = realm.authenticate(USER1, PWD);
+
+        Assert.assertNotNull(p);
+        Assert.assertEquals(USER1, p.getName());
+        Assert.assertTrue(realm.hasRole(null, p, ROLE1));
+        Assert.assertTrue(realm.hasRole(null, p, ROLE2));
+        Assert.assertTrue(realm.hasRole(null, p, "very-complex-role-name"));
+        Assert.assertFalse(realm.hasRole(null, p, ROLE3));
     }
 }

@@ -47,10 +47,6 @@
 <section name="Tomcat 9.0.23 (markt)" rtext="in development">
   <subsection name="Catalina">
     <changelog>
-      <fix>
-        <bug>63636</bug>: <code>Context.findRoleMapping()</code> never called
-        in <code>RealmBase#hasRole()</code>. (michaelo)
-      </fix>
       <update>
         <bug>63627</bug>: Implement more fine-grained handling in
         <code>RealmBase.authenticate(GSSContext, boolean)</code>. (michaelo)
@@ -90,6 +86,10 @@
         <bug>63608</bug>: Align the implementation of the negative match feature
         for patterns used with the <code>RewriteValve</code> with the
         description in the documentation. (markt)
+      </fix>
+      <fix>
+        <bug>63636</bug>: <code>Context.findRoleMapping()</code> never called
+        in <code>RealmBase#hasRole()</code>. (michaelo)
       </fix>
      </changelog>
   </subsection>
